@@ -1,0 +1,27 @@
+/* Basic styling for the Groceries App */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+}
+
+/* Ensure footer sticks to the bottom */
+html, body {
+    height: 100%;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+}
+
+/* Navbar styling */
+.navbar {
+    margin-bottom: 20px;
+}
+
+/* Card spacing */
+.card {
+    margin-bottom: 20px;
+}

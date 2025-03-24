@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'grocery',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +77,12 @@ WSGI_APPLICATION = 'groceries.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'groceries_db',
+        'USER': 'postgres',
+        'PASSWORD': '0HkeK5b7jg2NHhtQ5JJwqnr56QZOwi6n9RHu0AWngvIdI0xh',
+        'HOST': '3.254.141.89',
+        'PORT': '5432', 
     }
 }
 
@@ -115,9 +121,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'grocery' / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AWS_ACCESS_KEY_ID = 'ASIATUYJP7SUMHRQYCRW'
+AWS_SECRET_ACCESS_KEY = 'VzLS6hcd94b742taAyYdNkp3uQgtVJnhA8EmI3ne'
+AWS_REGION = 'eu-west-1'
+AWS_STORAGE_BUCKET_NAME = 'x24112682-smart-groceries'
+AWS_S3_REGION_NAME = AWS_REGION
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'

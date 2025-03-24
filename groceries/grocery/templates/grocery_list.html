@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load math_extras %}
+{% block title %}{{ grocery_list.name }}{% endblock %}
+
+{% block content %}
+<h2>{{ grocery_list.name }}</h2>
+<hr>
+
+<!-- Form for Adding a New Item -->
+<div>
+    <h4>Add Item</h4>
+    <form method="post" action="{% url 'add_item' grocery_list.id %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col">
+                <input type="text" name="name" class="form-control" placeholder="Item Name" required>
+            </div>
+            <div class="col">
+                <input type="number" name="quantity" class="form-control" placeholder="Quantity" value="1" required>
+            </div>
+            <div class="col">
+                <input type="text" name="price" class="form-control" placeholder="Price (e.g., 9.99)" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">Item Image (optional)</label>
+            <input type="file" name="image" class="form-control" id="image">
+        </div>
+        <button type="submit" class="btn btn-success">Add Item</button>
+    </form>
+</div>
+<hr>
+
+<!-- List all Items in the Grocery List -->
+<div>
+    <h4>Items</h4>
+    {% if items %}
+    <ul class="list-group">
+        {% for item in items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ item.name }}</strong> – 
+                ${{ item.quantity|floatformat:0 }} × ${{ item.price|floatformat:2 }} =
+                <span class="fw-bold">
+                    ${{ item.quantity|multiply:item.price|floatformat:2 }}
+                </span>
+                {% if item.image_url %}
+                <br>
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" style="max-height: 80px;">
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'edit_item' item.id %}" class="btn btn-sm btn-primary me-1">Edit</a>
+                <a href="{% url 'delete_item' item.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <p class="mt-2"><strong>Total Price:</strong> ${{ list_total }}</p>
+    {% else %}
+    <p>No items in this list.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Grocery List{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3>Create a New Grocery List</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="name" class="form-label">List Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter list name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create List</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
