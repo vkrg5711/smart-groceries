@@ -1,37 +1,84 @@
 {% extends 'base.html' %}
+{% load math_extras %}  {# if needed #}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Your Grocery Lists</h1>
-    <a href="{% url 'create_list' %}" class="btn btn-success">Create New List</a>
+<div class="mb-4">
+  <h1>Your Grocery Lists</h1>
+  <a href="{% url 'create_list' %}" class="btn btn-success">Create New List</a>
 </div>
+
+<!-- Section 1: My Lists -->
+<h2>My Lists</h2>
 <div class="row">
-    {% for grocery_list in grocery_lists %}
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    {{ grocery_list.name }}
-                    <small class="text-muted">(${{ grocery_list.total_price }})</small>
-                </h5>
-                {% if grocery_list.items_with_total %}
-                <ul class="list-group list-group-flush">
-                    {% for item, item_total in grocery_list.items_with_total %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ item.name }}
-                        <span class="badge bg-info rounded-pill">$ {{ item_total }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <p class="text-muted">No items in this list.</p>
-                {% endif %}
-                <a href="{% url 'view_list' grocery_list.id %}" class="btn btn-primary mt-2">Edit List</a>
-            </div>
-        </div>
+  {% for glist in my_lists %}
+  <div class="col-md-4 mb-3">
+    <div class="card h-100 position-relative">
+      <div class="card-body">
+        <h5 class="card-title">{{ glist.name }}</h5>
+        {% if glist.items_with_total %}
+        <ul class="list-group">
+          {% for item, item_total in glist.items_with_total %}
+          <li class="list-group-item d-flex align-items-center">
+            <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width:30px; height:30px; object-fit:cover; margin-right:8px;">
+            <span>{{ item.name }}</span>
+            <span class="ms-auto">${{ item_total|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No items in this list.</p>
+        {% endif %}
+      </div>
+      <div class="position-absolute bottom-0 start-0 p-2">
+        <a href="{% url 'edit_list' glist.id %}" class="btn btn-primary btn-sm">Edit List</a>
+      </div>
+      <div class="position-absolute bottom-0 end-0 p-2">
+        <form action="{% url 'delete_list' glist.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">Delete List</button>
+        </form>
+      </div>
+      <div class="position-absolute top-0 end-0 p-2">
+        <!-- Button to generate share link -->
+        <a href="{% url 'get_share_link' glist.id %}" class="btn btn-info btn-sm">Share</a>
+      </div>
     </div>
-    {% endfor %}
+  </div>
+  {% endfor %}
 </div>
+
+<!-- Section 2: Shared Lists -->
+<h2>Shared With Me</h2>
+{% if shared_lists %}
+<div class="row">
+  {% for glist in shared_lists %}
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ glist.name }}</h5>
+        <p class="small text-muted">Shared by: {{ glist.owner.username }}</p>
+        {% if glist.items_with_total %}
+        <ul class="list-group">
+          {% for item, item_total in glist.items_with_total %}
+          <li class="list-group-item d-flex align-items-center">
+            <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width:30px; height:30px; object-fit:cover; margin-right:8px;">
+            <span>{{ item.name }}</span>
+            <span class="ms-auto">${{ item_total|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No items in this list.</p>
+        {% endif %}
+      </div>
+      <!-- Optionally include actions for shared lists -->
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>No shared lists.</p>
+{% endif %}
 {% endblock %}

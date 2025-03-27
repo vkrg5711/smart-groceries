@@ -1,19 +1,53 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Grocery List{% endblock %}
+{% block title %}Create New Grocery List{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h3>Create a New Grocery List</h3>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="name" class="form-label">List Name</label>
-                <input type="text" class="form-control" id="name" name="name" placeholder="Enter list name" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Create List</button>
-        </form>
+<h2>Create New Grocery List</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="list_name" class="form-label">List Name</label>
+    <input type="text" class="form-control" id="list_name" name="list_name" placeholder="Enter list name">
+  </div>
+  <div class="row">
+    {% for item in catalogue %}
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ item.name }}</h5>
+          <p class="card-text">$ {{ item.price|floatformat:2 }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="decrement('{{ item.id }}')">-</button>
+            <!-- The quantity input is read-only and will be updated by JavaScript -->
+            <input type="text" class="form-control text-center quantity-input" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" value="0" style="width: 50px;" readonly>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="increment('{{ item.id }}')">+</button>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-primary">Create List</button>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// JavaScript functions to increment and decrement the quantity inputs
+function increment(itemId) {
+    let input = document.getElementById('quantity_' + itemId);
+    let current = parseInt(input.value) || 0;
+    input.value = current + 1;
+}
+
+function decrement(itemId) {
+    let input = document.getElementById('quantity_' + itemId);
+    let current = parseInt(input.value) || 0;
+    if(current > 0) {
+        input.value = current - 1;
+    }
+}
+</script>
 {% endblock %}

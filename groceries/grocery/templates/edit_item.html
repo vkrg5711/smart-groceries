@@ -1,34 +1,50 @@
 {% extends 'base.html' %}
-{% block title %}Edit Item{% endblock %}
+
+{% block title %}Edit Grocery List{% endblock %}
 
 {% block content %}
-<h2>Edit Item: {{ item.name }}</h2>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="name" class="form-label">Item Name</label>
-        <input type="text" name="name" id="name" class="form-control" value="{{ item.name }}" required>
+<h2>Edit Grocery List: {{ grocery_list.name }}</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="list_name" class="form-label">List Name</label>
+    <input type="text" class="form-control" id="list_name" name="list_name" value="{{ grocery_list.name }}">
+  </div>
+  <div class="row">
+    {% for item in catalogue %}
+    <div class="col-md-4 mb-3">
+      <div class="card">
+        <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ item.name }}</h5>
+          <p class="card-text">$ {{ item.price|floatformat:2 }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="decrement('{{ item.id }}')">-</button>
+            <input type="text" class="form-control text-center quantity-input" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" value="{{ item.quantity }}" style="width: 50px;" readonly>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="increment('{{ item.id }}')">+</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-        <label for="quantity" class="form-label">Quantity</label>
-        <input type="number" name="quantity" id="quantity" class="form-control" value="{{ item.quantity }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="price" class="form-label">Price</label>
-        <input type="text" name="price" id="price" class="form-control" value="{{ item.price }}" required>
-    </div>
-    {% if item.image_url %}
-    <div class="mb-3">
-        <label class="form-label">Current Image</label>
-        <br>
-        <img src="{{ item.image_url }}" alt="{{ item.name }}" style="max-height: 150px;">
-    </div>
-    {% endif %}
-    <div class="mb-3">
-        <label for="image" class="form-label">Change Image (optional)</label>
-        <input type="file" name="image" id="image" class="form-control">
-    </div>
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a href="{% url 'view_list' item.grocery_list.id %}" class="btn btn-secondary">Cancel</a>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function increment(itemId) {
+    let input = document.getElementById('quantity_' + itemId);
+    let current = parseInt(input.value) || 0;
+    input.value = current + 1;
+}
+function decrement(itemId) {
+    let input = document.getElementById('quantity_' + itemId);
+    let current = parseInt(input.value) || 0;
+    if (current > 0) {
+        input.value = current - 1;
+    }
+}
+</script>
 {% endblock %}
