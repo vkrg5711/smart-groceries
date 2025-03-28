@@ -2,20 +2,19 @@
 
 {% block title %}Login{% endblock %}
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title text-center">Login</h3>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                <p class="mt-3 text-center">Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
-            </div>
-        </div>
+{% block main_content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card shadow-sm" style="width: 100%; max-width: 400px; border-radius: 12px;">
+    <div class="card-body">
+      <h3 class="card-title text-center mb-4">Welcome Back</h3>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100 mb-3" style="border-radius: 8px;">Log In</button>
+      </form>
+      <hr>
+      <p class="text-center mb-0">Don't have an account? <a href="{% url 'signup' %}?next={{ request.GET.next|default:'' }}" class="text-decoration-none">Sign Up</a></p>
     </div>
+  </div>
 </div>
 {% endblock %}

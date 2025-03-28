@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}Create New Grocery List{% endblock %}
+{% block title %}Edit Grocery List{% endblock %}
 
 {% block main_content %}
-<h2>Create New Grocery List</h2>
+<h2>Edit Grocery List: {{ grocery_list.name }}</h2>
 <form method="post">
   {% csrf_token %}
   <div class="mb-3">
     <label for="list_name" class="form-label">List Name</label>
-    <input type="text" class="form-control" id="list_name" name="list_name" placeholder="Enter list name">
+    <input type="text" class="form-control" id="list_name" name="list_name" value="{{ grocery_list.name }}">
   </div>
   <div class="row">
     {% for item in catalogue %}
@@ -20,7 +20,7 @@
           <p class="card-text">$ {{ item.price|floatformat:2 }}</p>
           <div class="d-flex justify-content-between align-items-center">
             <button type="button" class="btn btn-secondary btn-sm" onclick="decrement('{{ item.id }}')">-</button>
-            <input type="text" class="form-control text-center quantity-input" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" value="0" style="width: 50px;" readonly>
+            <input type="text" class="form-control text-center quantity-input" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" value="{{ item.quantity }}" style="width: 50px;" readonly>
             <button type="button" class="btn btn-secondary btn-sm" onclick="increment('{{ item.id }}')">+</button>
           </div>
         </div>
@@ -28,7 +28,7 @@
     </div>
     {% endfor %}
   </div>
-  <button type="submit" class="btn btn-primary">Create List</button>
+  <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 {% endblock %}
 

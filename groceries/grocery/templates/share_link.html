@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Share Link{% endblock %}
+{% block title %}Share List{% endblock %}
 
-{% block content %}
+{% block main_content %}
 <h2>Share This List</h2>
-<p>Copy the link below and share it with someone:</p>
+<p>Copy and share the link below:</p>
 <div class="alert alert-info">
-    <strong>{{ share_link }}</strong>
+  <strong>{{ share_link }}</strong>
 </div>
 <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
 {% endblock %}

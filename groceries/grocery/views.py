@@ -29,7 +29,7 @@ CATALOGUE = [
 
 @login_required(login_url='/login/')
 def dashboard(request):
-    # My Lists: lists created by the current user.
+    # My Lists: lists where the user is the owner.
     my_lists = GroceryList.objects.filter(owner=request.user)
     for glist in my_lists:
         items = glist.groceryitem_set.all()
@@ -37,7 +37,7 @@ def dashboard(request):
         glist.total_price = total_price
         glist.items_with_total = [(item, item.quantity * item.price) for item in items]
     
-    # Shared Lists: lists shared with the current user.
+    # Shared Lists: lists where the current user is in shared_with.
     shared_lists = GroceryList.objects.filter(shared_with=request.user)
     for glist in shared_lists:
         items = glist.groceryitem_set.all()
@@ -75,126 +75,23 @@ def create_list(request):
         return render(request, 'create_list.html', {'catalogue': CATALOGUE})
 
 @login_required(login_url='/login/')
-def view_list(request, list_id):
-    try:
-        glist = GroceryList.objects.get(id=list_id)
-    except GroceryList.DoesNotExist:
-        return redirect('dashboard')
-    # Check ownership or sharing
-    if request.user != glist.owner and not glist.shared_with.filter(id=request.user.id).exists():
-        return redirect('dashboard')
-    items = glist.groceryitem_set.all()
-    list_total = sum(item.quantity * item.price for item in items)
-    return render(request, 'grocery_list.html', {'grocery_list': glist, 'items': items, 'list_total': list_total})
-
-def signup(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('dashboard')
-    else:
-        form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
-
-def login_view(request):
-    if request.method == "POST":
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            # Redirect to the next URL if provided; otherwise, fallback to the dashboard.
-            next_url = request.GET.get('next', 'dashboard')
-            return redirect(next_url)
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
-
-
-@login_required(login_url='/login/')
-def add_item(request, list_id):
-    if request.method == 'POST':
-        # Retrieve form values
-        name = request.POST.get('name')
-        quantity = request.POST.get('quantity', '1')
-        price = request.POST.get('price', '0')
-        image = request.FILES.get('image')  # uploaded file
-
-        # Convert quantity and price to proper data types
-        try:
-            quantity = int(quantity)
-            price = float(price)
-        except ValueError:
-            quantity, price = 1, 0.0
-
-        image_url = None
-        if image:
-            # Upload image to S3 and retrieve the URL (or None on failure)
-            image_url = upload_image_to_s3(image)
-
-        if name:
-            grocery_list = get_object_or_404(GroceryList, id=list_id)
-            item = GroceryItem(
-                grocery_list=grocery_list, 
-                name=name, 
-                quantity=quantity, 
-                price=price, 
-                image_url=image_url  # Save the S3 URL in the model
-            )
-            item.save()
-    return redirect('view_list', list_id=list_id)
-
-@login_required(login_url='/login/')
-def edit_item(request, item_id):
-    # Retrieve the item or return 404 if not found.
-    item = get_object_or_404(GroceryItem, id=item_id)
-    if request.method == 'POST':
-        # Retrieve form fields
-        name = request.POST.get('name')
-        quantity = request.POST.get('quantity', '1')
-        price = request.POST.get('price', '0')
-        new_image = request.FILES.get('image')  # new image upload, if provided
-
-        # Convert numeric fields
-        try:
-            quantity = int(quantity)
-            price = float(price)
-        except ValueError:
-            quantity, price = 1, 0.0
-
-        if name:
-            item.name = name
-            item.quantity = quantity
-            item.price = price
-            # Check if a new image was supplied; if so, upload and update URL.
-            if new_image:
-                image_url = upload_image_to_s3(new_image)
-                if image_url:
-                    item.image_url = image_url
-            item.save()
-            return redirect('view_list', list_id=item.grocery_list.id)
-    return render(request, 'edit_item.html', {'item': item})
-
-@login_required(login_url='/login/')
 def edit_list(request, list_id):
     glist = get_object_or_404(GroceryList, id=list_id)
-    # Build a dictionary of the current items in the list by name
+    # Allow editing if the user is the owner or is in shared_with.
+    if request.user != glist.owner and request.user not in glist.shared_with.all():
+        return redirect('dashboard')
+    # Build a catalogue with pre-populated quantities.
     existing_items = {item.name: item.quantity for item in glist.groceryitem_set.all()}
     catalog_with_qty = []
     for item in CATALOGUE:
-        item_copy = item.copy()  # make a copy so we do not alter the catalogue
+        item_copy = item.copy()
         item_copy['quantity'] = existing_items.get(item['name'], 0)
         catalog_with_qty.append(item_copy)
     if request.method == 'POST':
         list_name = request.POST.get('list_name') or glist.name
         glist.name = list_name
         glist.save()
-        # Delete all existing items before recreating
+        # Delete old items and recreate.
         glist.groceryitem_set.all().delete()
         for item in CATALOGUE:
             qty = request.POST.get(f'quantity_{item["id"]}')
@@ -212,21 +109,17 @@ def edit_list(request, list_id):
                 )
         return redirect('dashboard')
     else:
-        return render(request, 'edit_list.html', {'catalogue': catalog_with_qty, 'grocery_list': glist})
-
-@login_required(login_url='/login/')
-def delete_item(request, item_id):
-    item = get_object_or_404(GroceryItem, id=item_id)
-    grocery_list_id = item.grocery_list.id
-    if request.method == 'POST':
-        item.delete()
-        return redirect('view_list', list_id=grocery_list_id)
-    return render(request, 'delete_item.html', {'item': item})
-
+        return render(request, 'edit_list.html', {
+            'catalogue': catalog_with_qty,
+            'grocery_list': glist,
+        })
 
 @login_required(login_url='/login/')
 def delete_list(request, list_id):
     glist = get_object_or_404(GroceryList, id=list_id)
+    # Allow deletion only for owner.
+    if request.user != glist.owner:
+        return redirect('dashboard')
     if request.method == 'POST':
         glist.delete()
         return redirect('dashboard')
@@ -234,7 +127,7 @@ def delete_list(request, list_id):
 
 @login_required(login_url='/login/')
 def get_share_link(request, list_id):
-    # Only allow the list owner to share
+    # Only the owner can generate a share link.
     glist = get_object_or_404(GroceryList, id=list_id, owner=request.user)
     if not glist.share_token:
         glist.share_token = uuid.uuid4().hex
@@ -242,29 +135,41 @@ def get_share_link(request, list_id):
     share_link = request.build_absolute_uri(f"/share/{glist.share_token}/")
     return render(request, "share_link.html", {"share_link": share_link})
 
-
-
 def share_list(request, token):
-    """
-    When a shared link is clicked:
-      - If the user is not authenticated, redirect them to the login page with next set to this share URL.
-      - Once logged in (or signed up), add the user to the shared_with and then redirect to dashboard.
-    """
     try:
         glist = GroceryList.objects.get(share_token=token)
     except GroceryList.DoesNotExist:
-        # Optionally display an error if the token is invalid.
         return redirect('login')
-    
     if not request.user.is_authenticated:
-        # Redirect to login so that after authentication, the user returns to this share URL.
         return redirect(f"/login/?next=/share/{token}/")
-    
-    # If the current user is not the owner, add them to the shared lists.
-    print(glist.owner)
-    print(request.user)
-
+    # Allow shared users to edit: add the user to shared_with.
     if request.user != glist.owner:
         glist.shared_with.add(request.user)
-        glist.save()
     return redirect('dashboard')
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            next_url = request.GET.get('next', 'dashboard')
+            return redirect(next_url)
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

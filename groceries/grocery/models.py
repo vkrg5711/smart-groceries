@@ -12,7 +12,7 @@ class GroceryList(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     shared_with = models.ManyToManyField(User, related_name='shared_lists', blank=True)
-    share_token = models.CharField(max_length=50, blank=True, null=True, unique=True)  # New Field
+    share_token = models.CharField(max_length=50, blank=True, null=True, unique=True)
 
     def __str__(self):
         return self.name

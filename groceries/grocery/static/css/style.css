@@ -1,33 +1,95 @@
-/* Basic styling for the Groceries App */
-
+/* General Base CSS */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     background-color: #f4f4f4;
-}
-
-/* Ensure footer sticks to the bottom */
-html, body {
-    height: 100%;
-}
-
-footer {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
-}
-
-/* Navbar styling */
-.navbar {
-    margin-bottom: 20px;
-}
-
-/* Card spacing */
-.card {
-    margin-bottom: 20px;
-}
-/* Force the card images to be the same size */
-.card-img-top {
-    width: 100%;
-    height: 200px; /* set desired height */
-    object-fit: cover; /* crop to maintain aspect ratio */
-}
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Navbar height is assumed to be 56px by default from Bootstrap */
+  
+  /* Fixed Sidebar Styling */
+  .sidebar {
+    width: 250px;
+    height: calc(100vh - 56px); /* Full viewport height minus navbar height */
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    position: fixed;
+    top: 56px; /* start just below navbar */
+    left: 0;
+    z-index: 1040;
+    overflow-y: auto;
+    transition: transform 0.3s ease; /* For smooth collapse effect */
+  }
+  
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #ddd;
+    background-color: #f8f9fa;
+  }
+  
+  .sidebar .list-group-item {
+    border: none;
+    padding: 0.75rem 1.25rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sidebar .list-group-item a {
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .sidebar .list-group-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Collapsed Sidebar */
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+  
+  /* Show Sidebar Button Styling */
+  .show-sidebar {
+    position: fixed;
+    top: 64px;
+    left: 10px;
+    z-index: 1050;
+    transition: opacity 0.3s ease;
+  }
+  
+  /* Content Container Adjusted for Sidebar */
+  .content-container {
+    margin-left: 250px;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* When Sidebar is Collapsed */
+  .content-container.expanded {
+    margin-left: 0;
+  }
+  
+  /* Scrollable List Container inside Cards */
+  .scrollable-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  /* Thumbnail images for list items */
+  .item-thumbnail {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    margin-right: 8px;
+  }
+  
+  /* Card adjustments: Remove absolute positioning from buttons */
+  .card-footer {
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+  }
+  
