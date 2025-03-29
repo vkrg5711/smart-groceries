@@ -17,7 +17,7 @@
         <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.name }}">
         <div class="card-body">
           <h5 class="card-title">{{ item.name }}</h5>
-          <p class="card-text">$ {{ item.price|floatformat:2 }}</p>
+          <p class="card-text">€ {{ item.price|floatformat:2 }}</p>
           <div class="d-flex justify-content-between align-items-center">
             <button type="button" class="btn btn-secondary btn-sm" onclick="decrement('{{ item.id }}')">-</button>
             <input type="text" class="form-control text-center quantity-input" id="quantity_{{ item.id }}" name="quantity_{{ item.id }}" value="{{ item.quantity }}" style="width: 50px;" readonly>

@@ -40,9 +40,9 @@
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
                 <strong>{{ item.name }}</strong> – 
-                ${{ item.quantity|floatformat:0 }} × ${{ item.price|floatformat:2 }} =
+                €{{ item.quantity|floatformat:0 }} × €{{ item.price|floatformat:2 }} =
                 <span class="fw-bold">
-                    ${{ item.quantity|multiply:item.price|floatformat:2 }}
+                    €{{ item.quantity|multiply:item.price|floatformat:2 }}
                 </span>
                 {% if item.image_url %}
                 <br>
@@ -56,7 +56,7 @@
         </li>
         {% endfor %}
     </ul>
-    <p class="mt-2"><strong>Total Price:</strong> ${{ list_total }}</p>
+    <p class="mt-2"><strong>Total Price:</strong> €{{ list_total }}</p>
     {% else %}
     <p>No items in this list.</p>
     {% endif %}

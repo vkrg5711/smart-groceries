@@ -17,7 +17,7 @@
       <div class="card h-100">
         <div class="card-body">
           <h5 class="card-title">{{ glist.name }}</h5>
-          <p class="small text-muted">Total: ${{ glist.total_price|floatformat:2 }}</p>
+          <p class="small text-muted">Total: €{{ glist.total_price|floatformat:2 }}</p>
           <!-- Scrollable items container -->
           <div class="scrollable-list">
           {% if glist.items_with_total %}
@@ -26,7 +26,7 @@
                 <li class="list-group-item d-flex align-items-center">
                   <img src="{{ item.image_url }}" alt="{{ item.name }}" class="item-thumbnail">
                   <span>{{ item.name }}</span>
-                  <span class="ms-auto">${{ item_total|floatformat:2 }}</span>
+                  <span class="ms-auto">€{{ item_total|floatformat:2 }}</span>
                 </li>
               {% endfor %}
             </ul>
@@ -63,7 +63,7 @@
         <div class="card-body">
           <h5 class="card-title">{{ glist.name }}</h5>
           <p class="small text-muted">Shared by: {{ glist.owner.username }}</p>
-          <p class="small text-muted">Total: ${{ glist.total_price|floatformat:2 }}</p>
+          <p class="small text-muted">Total: €{{ glist.total_price|floatformat:2 }}</p>
           <div class="scrollable-list">
           {% if glist.items_with_total %}
             <ul class="list-group">
@@ -71,7 +71,7 @@
                 <li class="list-group-item d-flex align-items-center">
                   <img src="{{ item.image_url }}" alt="{{ item.name }}" class="item-thumbnail">
                   <span>{{ item.name }}</span>
-                  <span class="ms-auto">${{ item_total|floatformat:2 }}</span>
+                  <span class="ms-auto">€{{ item_total|floatformat:2 }}</span>
                 </li>
               {% endfor %}
             </ul>
